@@ -7,7 +7,7 @@ plugins {
 
 android {
     namespace = "com.example.starwars"
-    compileSdk = libs.versions.compileSdk.get().toInt()
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "com.example.starwars"
@@ -29,12 +29,11 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
-        isCoreLibraryDesugaringEnabled = true
+        sourceCompatibility = JavaVersion.VERSION_11
+        targetCompatibility = JavaVersion.VERSION_11
     }
     kotlinOptions {
-        jvmTarget = libs.versions.jvmTarget.get().toString()
+        jvmTarget = "11"
     }
     buildFeatures {
         compose = true
@@ -53,34 +52,36 @@ dependencies {
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
     implementation(platform(libs.androidx.compose.bom))
-
     implementation(libs.androidx.ui)
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.navigation.compose)
-
-    implementation(libs.androidx.core.splashscreen)
+    implementation(libs.androidx.material3)
+    implementation(libs.okhttp)
+    implementation(libs.okhttp.logging)
 
     implementation(libs.koin.core)
     implementation(libs.koin.androidx.compose.navigation)
     implementation(project.dependencies.platform(libs.koin.bom))
     implementation(libs.koin.android)
 
-    implementation(libs.coil.compose)
     implementation(libs.retrofit)
-    implementation(libs.okhttp)
-    implementation(libs.okhttp.logging)
     implementation(libs.retrofit.gson)
-
-    implementation(libs.androidx.material3)
 
     implementation(libs.room)
     implementation(libs.room.ktx)
     ksp(libs.room.annotation)
 
-    coreLibraryDesugaring(libs.desugar.jdk.libs)
+    testImplementation(libs.junit)
+    androidTestImplementation(libs.androidx.junit)
+    androidTestImplementation(libs.androidx.espresso.core)
+    androidTestImplementation(platform(libs.androidx.compose.bom))
+    androidTestImplementation(libs.androidx.ui.test.junit4)
 
-    implementation(libs.androidx.preference)
+    debugImplementation(libs.androidx.ui.tooling)
+    debugImplementation(libs.androidx.ui.test.manifest)
+
+    implementation (libs.androidx.lifecycle.viewmodel.compose)
 
     testImplementation(libs.koin.test)
     testImplementation(libs.koin.test.junit4)
@@ -88,7 +89,6 @@ dependencies {
 
     testImplementation(libs.junit)
     testImplementation(libs.androidx.compose.ui.test.junit4)
-    debugImplementation(libs.androidx.compose.ui.test.manifest)
     testImplementation(libs.androidx.navigation.testing)
     androidTestImplementation(libs.androidx.navigation.testing)
 
@@ -104,9 +104,4 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     androidTestImplementation(libs.androidx.navigation.testing)
 
-    implementation(libs.androidx.ui.tooling.preview)
-    debugImplementation(libs.androidx.ui.tooling)
-    debugImplementation(libs.androidx.ui.test.manifest)
-
-    coreLibraryDesugaring(libs.desugar.jdk.libs)
 }
