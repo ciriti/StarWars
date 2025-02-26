@@ -10,6 +10,7 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -26,29 +27,37 @@ import com.example.starwars.domain.service.PeopleService
 import com.example.starwars.ui.screen.component.ErrorMessage
 import com.example.starwars.ui.screen.component.LoadingIndicator
 import com.example.starwars.ui.theme.StarWarsAppTheme
+import org.koin.androidx.compose.koinViewModel
 
 @Composable
 fun PersonProfileScreen(
-    viewModel: PersonProfileViewModel,
+    personId: Int,
+    viewModel: PersonProfileViewModel = koinViewModel(),
     modifier: Modifier = Modifier
         .semantics { contentDescription = "Profile" },
 ) {
     val profileState by viewModel.state.collectAsState()
 
-    when (profileState) {
-        is PersonProfileScreenState.Loading -> {
-            LoadingIndicator(modifier = modifier)
-        }
+    LaunchedEffect(personId) {
+        viewModel.loadPersonProfile(personId)
+    }
 
-        is PersonProfileScreenState.Success -> {
-            val person = (profileState as PersonProfileScreenState.Success).personProfile
-            Column(
-                modifier = modifier
-                    .fillMaxSize()
-                    .padding(16.dp),
-                verticalArrangement = Arrangement.Top,
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .padding(16.dp),
+        verticalArrangement = Arrangement.Top,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+
+        when (profileState) {
+            is PersonProfileScreenState.Loading -> {
+                LoadingIndicator(modifier = modifier)
+            }
+
+            is PersonProfileScreenState.Success -> {
+                val person = (profileState as PersonProfileScreenState.Success).personProfile
+
                 Text(
                     text = person.name,
                     style = MaterialTheme.typography.titleLarge,
@@ -72,14 +81,15 @@ fun PersonProfileScreen(
                     )
                 )
             }
-        }
 
-        is PersonProfileScreenState.Error -> {
-            ErrorMessage(
-                message = (profileState as PersonProfileScreenState.Error).message,
-                modifier = modifier,
-                showRetryButton = false
-            )
+
+            is PersonProfileScreenState.Error -> {
+                ErrorMessage(
+                    message = (profileState as PersonProfileScreenState.Error).message,
+                    modifier = modifier,
+                    showRetryButton = false
+                )
+            }
         }
     }
 }
@@ -137,6 +147,7 @@ class MockViewModel(
 fun PreviewProfileSuccessCase() {
     StarWarsAppTheme {
         PersonProfileScreen(
+            personId = 1,
             viewModel = MockViewModel().apply { loadPersonProfile(1) },
         )
     }
@@ -147,6 +158,7 @@ fun PreviewProfileSuccessCase() {
 fun PreviewProfileErrorCase() {
     StarWarsAppTheme {
         PersonProfileScreen(
+            personId = 1,
             viewModel = MockViewModel(
                 resultGetPersonId = Result.failure(RuntimeException("Error"))
             ).apply { loadPersonProfile(1) },
