@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.starwars.domain.service.PeopleService
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
 
 open class PersonProfileViewModel(
