@@ -4,6 +4,7 @@ package com.example.starwars.ui.screen.people
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -14,6 +15,11 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.tooling.preview.Preview
+import com.example.starwars.domain.model.Page
+import com.example.starwars.domain.model.Person
+import com.example.starwars.domain.model.PersonProfile
+import com.example.starwars.domain.service.PeopleService
 import com.example.starwars.ui.screen.component.ErrorMessage
 import com.example.starwars.ui.screen.component.LoadingIndicator
 import com.example.starwars.ui.screen.component.PersonItem
@@ -28,7 +34,7 @@ fun PeopleScreen(
 
     val state by viewModel.state.collectAsState()
 
-    val peopleList by remember{
+    val peopleList by remember {
         derivedStateOf { (state as? PeopleScreenState.Success)?.characters ?: emptyList() }
     }
 
@@ -60,6 +66,7 @@ fun PeopleScreen(
                 modifier = modifier
             )
         }
+
         else -> LazyColumn(
             state = listState,
             modifier = modifier
@@ -70,5 +77,53 @@ fun PeopleScreen(
         }
 
 
+    }
+}
+
+val mockPage = Page(
+    next = null,
+    previous = null,
+    results = listOf(
+        Person(1, "Luke Skywalker", "180", "80", "1980", "Male"),
+        Person(2, "Luke Skywalker", "180", "80", "1980", "Male"),
+        Person(3, "Luke Skywalker", "180", "80", "1980", "Male"),
+    ),
+    count = 1
+)
+
+class MockPeopleViewModel(
+    val resultGetPeople: Result<Page<Person>>,
+    val resultGetPersonId: Result<PersonProfile>
+) : PeopleViewModel(
+    peopleService = object : PeopleService {
+        override suspend fun getPeople(page: Int): Result<Page<Person>> = resultGetPeople
+        override suspend fun getPersonById(id: Int): Result<PersonProfile> = resultGetPersonId
+    },
+    getNextPage = { next -> null }
+)
+
+@Preview(name = "SuccessCase")
+@Composable
+fun PeopleScreenSuccessPreview() {
+    PeopleScreen(
+        viewModel = MockPeopleViewModel(
+            resultGetPeople = Result.success(mockPage),
+            resultGetPersonId = Result.failure(RuntimeException())
+        ),
+        onNavigateToDetails = {}
+    )
+}
+
+@Preview(name = "ErrorCase")
+@Composable
+fun PeopleScreenErrorPreview() {
+    MaterialTheme {
+        PeopleScreen(
+            viewModel = MockPeopleViewModel(
+                resultGetPeople = Result.failure(RuntimeException()),
+                resultGetPersonId = Result.failure(RuntimeException())
+            ),
+            onNavigateToDetails = {}
+        )
     }
 }

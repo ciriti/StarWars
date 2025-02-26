@@ -11,7 +11,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
-class PeopleViewModel(
+open class PeopleViewModel(
     private val peopleService: PeopleService,
     private val getNextPage: (String?) -> Int? = { next ->
         next?.let { Uri.parse(next).getQueryParameter("page")?.toIntOrNull() }
