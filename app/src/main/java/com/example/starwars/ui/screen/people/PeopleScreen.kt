@@ -7,7 +7,9 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.contentDescription
@@ -26,6 +28,18 @@ fun PeopleScreen(
 
     val state by viewModel.state.collectAsState()
 
+    val peopleList by remember{
+        derivedStateOf { (state as? PeopleScreenState.Success)?.characters ?: emptyList() }
+    }
+
+    val isLoading by remember {
+        derivedStateOf { state is PeopleScreenState.Loading }
+    }
+
+    val errorMessage by remember {
+        derivedStateOf { (state as? PeopleScreenState.Error)?.message }
+    }
+
     val listState = rememberLazyListState()
     // Load more data when the last item becomes visible
     LaunchedEffect(listState) {
@@ -37,23 +51,24 @@ fun PeopleScreen(
             }
     }
 
-    when (state) {
-        is PeopleScreenState.Loading -> LoadingIndicator(modifier = modifier)
-        is PeopleScreenState.Success -> LazyColumn(
-            state = listState,
-            modifier = modifier
-        ) {
-            items((state as PeopleScreenState.Success).characters) { person ->
-                PersonItem(person = person) { onNavigateToDetails(person.id) }
-            }
-        }
-
-        is PeopleScreenState.Error -> {
+    when {
+        isLoading -> LoadingIndicator(modifier = modifier)
+        errorMessage != null -> {
             ErrorMessage(
-                message = (state as PeopleScreenState.Error).message,
+                message = errorMessage!!,
                 onRetry = { viewModel.loadData() },
                 modifier = modifier
             )
         }
+        else -> LazyColumn(
+            state = listState,
+            modifier = modifier
+        ) {
+            items(items = peopleList, key = { it.id }) { person ->
+                PersonItem(person = person) { onNavigateToDetails(person.id) }
+            }
+        }
+
+
     }
 }
