@@ -128,7 +128,7 @@ fun PeopleScreenSuccessPreview() {
 
 @Preview(name = "ErrorCase")
 @Composable
-fun PeopleScreenErrorPreview() {
+fun PeopleScreenErrorPreview(showBackground: Boolean = true) {
     MaterialTheme {
         PeopleScreen(
             viewModel = MockPeopleViewModel(

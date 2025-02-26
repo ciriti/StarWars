@@ -29,6 +29,15 @@ data class PersonEntity(
     val timestamp: Long = System.currentTimeMillis()
 )
 
+@Entity(
+    tableName = "film",
+
+)
+data class FilmEntity(
+    val personId : Int,
+    val filmUrl: String
+)
+
 fun PersonEntity.toDto(): PersonDto {
     return PersonDto(
         name = name,
