@@ -4,6 +4,7 @@ import com.example.starwars.data.datasource.local.entity.PersonEntity
 import com.example.starwars.domain.model.Page
 import com.example.starwars.domain.model.Person
 import com.example.starwars.domain.model.PersonProfile
+import java.util.Date
 
 fun PersonDto.toPerson(): Person {
     val id = url.trim().split("/")[5].toIntOrNull()
@@ -68,6 +69,30 @@ fun PersonDto.toEntity(): PersonEntity {
         starships = starships,
         created = created,
         edited = edited,
+        url = url
+    )
+}
+
+fun PersonDtoK.toEntity(): PersonEntity {
+    val id = url.trim().split("/")[5].toIntOrNull()
+        ?: throw IllegalArgumentException("Invalid person id")
+    return PersonEntity(
+        id = id,
+        name = name,
+        height = height,
+        mass = mass,
+        hairColor = hair_color,
+        skinColor = skin_color,
+        eyeColor = eye_color,
+        birthYear = birth_year,
+        gender = gender,
+        homeworld = homeworld,
+        films = films,
+        species = species,
+        vehicles = vehicles,
+        starships = starships,
+        created = Date(),
+        edited = Date(),
         url = url
     )
 }

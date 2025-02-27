@@ -9,7 +9,12 @@ import com.example.starwars.data.datasource.local.entity.Converters
 import com.example.starwars.data.datasource.local.entity.PaginatedPersonEntity
 import com.example.starwars.data.datasource.local.entity.PersonEntity
 
-@Database(entities = [PersonEntity::class, PaginatedPersonEntity::class], version = 1, exportSchema = false)
+@Database(
+    entities = [
+        PersonEntity::class,
+        PaginatedPersonEntity::class
+    ], version = 1, exportSchema = false
+)
 @TypeConverters(Converters::class)
 abstract class StarWarsDatabase : RoomDatabase() {
     abstract fun personDao(): PersonDao

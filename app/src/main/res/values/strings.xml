@@ -1,3 +1,18 @@
 <resources>
     <string name="app_name">StarWarsApp</string>
+
+    <string name="profile_content_description">Profile</string>
+    <string name="height_label">Height</string>
+    <string name="mass_label">Mass</string>
+    <string name="hair_color_label">Hair Color</string>
+    <string name="skin_color_label">Skin Color</string>
+    <string name="eye_color_label">Eye Color</string>
+    <string name="birth_year_label">Birth Year</string>
+    <string name="gender_label">Gender</string>
+    <string name="homeworld_label">Homeworld</string>
+    <string name="created_label">Created</string>
+    <string name="edited_label">Edited</string>
+    <string name="url_label">URL</string>
+    <string name="unknown_error">Unknown error</string>
+    <string name="retry">Retry</string>
 </resources>
