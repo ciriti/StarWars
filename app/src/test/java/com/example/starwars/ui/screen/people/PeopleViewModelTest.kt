@@ -35,23 +35,21 @@ class PeopleViewModelTest {
     @Test
     fun `loadData should update state to Success when service call is successful`() =
         testScope.runTest {
-            turbineScope {
-                // Arrange
-                val peoplePage = Page(
-                    count = 1,
-                    next = null,
-                    previous = null,
-                    results = listOf(person)
-                )
-                coEvery { mockPeopleService.getPeople(1) } returns Result.success(peoplePage)
-                val states = viewModel.state.testIn(backgroundScope)
-
+            // Arrange
+            val peoplePage = Page(
+                count = 1,
+                next = null,
+                previous = null,
+                results = listOf(person)
+            )
+            coEvery { mockPeopleService.getPeople(1) } returns Result.success(peoplePage)
+            viewModel.state.test {
                 // Act
                 viewModel.loadData()
 
                 // Assert
-                assertEquals(PeopleScreenState.Loading, states.awaitItem())
-                assertEquals(PeopleScreenState.Success(peoplePage.results), states.awaitItem())
+                assertEquals(PeopleScreenState.Loading, awaitItem())
+                assertEquals(PeopleScreenState.Success(peoplePage.results), awaitItem())
             }
         }
 

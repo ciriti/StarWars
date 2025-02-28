@@ -1,6 +1,6 @@
 package com.example.starwars.ui.screen.profile
 
-import app.cash.turbine.turbineScope
+import app.cash.turbine.test
 import com.example.starwars.domain.model.PersonProfile
 import com.example.starwars.domain.service.PeopleService
 import io.mockk.coEvery
@@ -34,40 +34,36 @@ class PersonPersonProfileViewModelTest {
     @Test
     fun `loadPersonProfile should update state to Success when service call is successful`() =
         testScope.runTest {
-            turbineScope {
-                // Arrange
-                coEvery { mockPeopleService.getPersonById(any()) } returns Result.success(person)
+            // Arrange
+            coEvery { mockPeopleService.getPersonById(any()) } returns Result.success(person)
 
-                val states = viewModel.state.testIn(backgroundScope)
-
+            viewModel.state.test {
                 // Act
                 viewModel.loadPersonProfile(personId)
 
                 // Assert
-                assertEquals(PersonProfileScreenState.Loading, states.awaitItem())
-                assertEquals(PersonProfileScreenState.Success(person), states.awaitItem())
+                assertEquals(PersonProfileScreenState.Loading, awaitItem())
+                assertEquals(PersonProfileScreenState.Success(person), awaitItem())
             }
         }
 
     @Test
     fun `loadPersonProfile should update state to Error when service call fails`() =
         testScope.runTest {
-            turbineScope {
-                // Arrange
-                val errorMessage = "Network error"
-                coEvery { mockPeopleService.getPersonById(personId) } returns Result.failure(
-                    Exception(
-                        errorMessage
-                    )
+            // Arrange
+            val errorMessage = "Network error"
+            coEvery { mockPeopleService.getPersonById(personId) } returns Result.failure(
+                Exception(
+                    errorMessage
                 )
-                val states = viewModel.state.testIn(backgroundScope)
-
+            )
+            viewModel.state.test {
                 // Act
                 viewModel.loadPersonProfile(personId)
 
                 // Assert
-                assertEquals(PersonProfileScreenState.Loading, states.awaitItem())
-                assertEquals(PersonProfileScreenState.Error(errorMessage), states.awaitItem())
+                assertEquals(PersonProfileScreenState.Loading, awaitItem())
+                assertEquals(PersonProfileScreenState.Error(errorMessage), awaitItem())
             }
         }
 }
