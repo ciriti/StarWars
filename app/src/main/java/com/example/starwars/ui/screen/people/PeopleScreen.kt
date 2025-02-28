@@ -23,6 +23,9 @@ import com.example.starwars.domain.service.PeopleService
 import com.example.starwars.ui.screen.component.ErrorMessage
 import com.example.starwars.ui.screen.component.LoadingIndicator
 import com.example.starwars.ui.screen.component.PersonItem
+import com.example.starwars.ui.theme.StarWarsAppTheme
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import org.koin.androidx.compose.koinViewModel
 
 @Composable
@@ -98,14 +101,18 @@ val mockPage = Page(
 
 class MockPeopleViewModel(
     val resultGetPeople: Result<Page<Person>>,
-    val resultGetPersonId: Result<PersonProfile>
+    val resultGetPersonId: Result<PersonProfile>,
+    val isLoading: Boolean = false,
 ) : PeopleViewModel(
     peopleService = object : PeopleService {
         override suspend fun getPeople(page: Int): Result<Page<Person>> = resultGetPeople
         override suspend fun getPersonById(id: Int): Result<PersonProfile> = resultGetPersonId
     },
-    getNextPage = { next -> null }
-)
+    getNextPage = { null }
+) {
+    override val state: StateFlow<PeopleScreenState>
+        get() = if (isLoading) MutableStateFlow(PeopleScreenState.Loading) else super.state
+}
 
 @Preview(name = "SuccessCase")
 @Composable
@@ -127,6 +134,21 @@ fun PeopleScreenErrorPreview() {
             viewModel = MockPeopleViewModel(
                 resultGetPeople = Result.failure(RuntimeException()),
                 resultGetPersonId = Result.failure(RuntimeException())
+            ),
+            onNavigateToDetails = {}
+        )
+    }
+}
+
+@Preview(name = "LoadingCase")
+@Composable
+fun PeopleScreenLoadingPreview() {
+    StarWarsAppTheme {
+        PeopleScreen(
+            viewModel = MockPeopleViewModel(
+                resultGetPeople = Result.failure(RuntimeException()),
+                resultGetPersonId = Result.failure(RuntimeException()),
+                isLoading = true,
             ),
             onNavigateToDetails = {}
         )

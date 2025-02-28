@@ -20,7 +20,7 @@ open class PeopleViewModel(
 
     private val _state =
         MutableStateFlow<PeopleScreenState>(PeopleScreenState.Loading)
-    val state: StateFlow<PeopleScreenState> = _state.asStateFlow()
+    open val state: StateFlow<PeopleScreenState> = _state.asStateFlow()
 
     private var currentPage = 1
     private var isLastPage = false
