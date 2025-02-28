@@ -10,11 +10,15 @@ fun NavGraphBuilder.peopleRoute(
     navController: NavHostController,
 ) {
     composable(Route.People.route) {
-        val viewModel: PeopleViewModel = koinViewModel()
         PeopleScreen(
-            viewModel = viewModel,
             onNavigateToDetails = { personId ->
-                navController.navigate("person_profile/$personId")
+                navController.navigate("person_profile/$personId"){
+                    popUpTo(Route.People.route) {
+                        saveState = true
+                    }
+                    restoreState = true
+                    launchSingleTop = true
+                }
             },
         )
     }

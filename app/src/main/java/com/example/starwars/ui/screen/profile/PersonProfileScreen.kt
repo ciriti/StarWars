@@ -10,6 +10,7 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -21,14 +22,20 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.starwars.ui.screen.component.ErrorMessage
 import com.example.starwars.ui.screen.component.LoadingIndicator
+import org.koin.androidx.compose.koinViewModel
 
 @Composable
 fun PersonProfileScreen(
-    viewModel: PersonProfileViewModel,
+    personId: Int,
+    viewModel: PersonProfileViewModel = koinViewModel(),
     modifier: Modifier = Modifier
         .semantics { contentDescription = "Profile" },
 ) {
     val profileState by viewModel.state.collectAsState()
+
+    LaunchedEffect(personId) {
+        viewModel.loadPersonProfile(personId)
+    }
 
     when (profileState) {
         is PersonProfileScreenState.Loading -> {
