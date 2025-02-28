@@ -5,15 +5,9 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import com.example.starwars.domain.model.Person
-import com.example.starwars.ui.screen.people.PeopleScreen
+import com.example.starwars.ui.screen.people.PeopleScreenContent
 import com.example.starwars.ui.screen.people.PeopleScreenState
-import com.example.starwars.ui.screen.people.PeopleViewModel
-import io.mockk.every
-import io.mockk.mockk
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import org.junit.Assert.assertEquals
-import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 
@@ -21,24 +15,15 @@ class PeopleScreenKtTest {
 
     @get:Rule
     val composeTestRule = createComposeRule()
-    private lateinit var viewModel: PeopleViewModel
-
-    @Before
-    fun setUp() {
-        viewModel = mockk(relaxed = true)
-    }
 
     @Test
     fun loaderIndicatorIsDisplayed() {
-        // arrange
-        every { viewModel.state } returns MutableStateFlow(PeopleScreenState.Loading)
-            .asStateFlow()
-
         // act
         composeTestRule.setContent {
-            PeopleScreen(
-                viewModel = viewModel,
-                onNavigateToDetails = { }
+            PeopleScreenContent(
+                state = PeopleScreenState.Loading,
+                onNavigateToDetails = { },
+                loadNextPage = {}
             )
         }
 
@@ -48,14 +33,12 @@ class PeopleScreenKtTest {
 
     @Test
     fun errorMessageIsDisplayed() {
-        // arrange
-        every { viewModel.state } returns MutableStateFlow(PeopleScreenState.Error("error")).asStateFlow()
-
         // act
         composeTestRule.setContent {
-            PeopleScreen(
-                viewModel = viewModel,
-                onNavigateToDetails = {}
+            PeopleScreenContent(
+                state = PeopleScreenState.Error("error"),
+                onNavigateToDetails = { },
+                loadNextPage = {}
             )
         }
 
@@ -65,14 +48,16 @@ class PeopleScreenKtTest {
     }
 
     @Test
-    fun onNavigateToDetailsIsInvoked(){
+    fun onNavigateToDetailsIsInvoked() {
         // arrange
-        val successState = PeopleScreenState.Success(listOf(mockPerson))
-        every { viewModel.state } returns MutableStateFlow(successState)
         var selectedId = -1
 
         // act
-        composeTestRule.setContent { PeopleScreen(viewModel) { selectedId = it } }
+        composeTestRule.setContent { PeopleScreenContent(
+            state = PeopleScreenState.Success(listOf(mockPerson)),
+            onNavigateToDetails = { selectedId = it },
+            loadNextPage = {}
+        )  }
         composeTestRule.onNodeWithText("Luke Skywalker").performClick()
 
         // assert

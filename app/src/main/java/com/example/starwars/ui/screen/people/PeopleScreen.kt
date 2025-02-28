@@ -18,14 +18,10 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.tooling.preview.Preview
 import com.example.starwars.domain.model.Page
 import com.example.starwars.domain.model.Person
-import com.example.starwars.domain.model.PersonProfile
-import com.example.starwars.domain.service.PeopleService
 import com.example.starwars.ui.screen.component.ErrorMessage
 import com.example.starwars.ui.screen.component.LoadingIndicator
 import com.example.starwars.ui.screen.component.PersonItem
 import com.example.starwars.ui.theme.StarWarsAppTheme
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import org.koin.androidx.compose.koinViewModel
 
 @Composable
@@ -38,6 +34,23 @@ fun PeopleScreen(
 
     val state by viewModel.state.collectAsState()
 
+    PeopleScreenContent(
+        state = state,
+        onNavigateToDetails = onNavigateToDetails,
+        loadNextPage = { viewModel.loadData() },
+        modifier = modifier
+    )
+
+}
+
+@Composable
+fun PeopleScreenContent(
+    state: PeopleScreenState,
+    onNavigateToDetails: (Int) -> Unit,
+    loadNextPage: () -> Unit,
+    modifier: Modifier = Modifier
+        .semantics { contentDescription = "People" },
+) {
     val character by remember {
         derivedStateOf {
             (state as? PeopleScreenState.Success)?.characters ?: emptyList()
@@ -58,7 +71,7 @@ fun PeopleScreen(
         snapshotFlow { listState.layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: 0 }
             .collect { lastVisibleItemIndex ->
                 if (lastVisibleItemIndex >= listState.layoutInfo.totalItemsCount - 5) {
-                    viewModel.loadData()
+                    loadNextPage()
                 }
             }
     }
@@ -69,7 +82,7 @@ fun PeopleScreen(
         errorMessage != null -> {
             ErrorMessage(
                 message = errorMessage!!,
-                onRetry = { viewModel.loadData() },
+                onRetry = { loadNextPage() },
                 modifier = modifier
             )
         }
@@ -87,7 +100,6 @@ fun PeopleScreen(
     }
 }
 
-
 val mockPage = Page(
     next = null,
     previous = null,
@@ -99,29 +111,12 @@ val mockPage = Page(
     count = 1
 )
 
-class MockPeopleViewModel(
-    val resultGetPeople: Result<Page<Person>>,
-    val resultGetPersonId: Result<PersonProfile>,
-    val isLoading: Boolean = false,
-) : PeopleViewModel(
-    peopleService = object : PeopleService {
-        override suspend fun getPeople(page: Int): Result<Page<Person>> = resultGetPeople
-        override suspend fun getPersonById(id: Int): Result<PersonProfile> = resultGetPersonId
-    },
-    getNextPage = { null }
-) {
-    override val state: StateFlow<PeopleScreenState>
-        get() = if (isLoading) MutableStateFlow(PeopleScreenState.Loading) else super.state
-}
-
 @Preview(name = "SuccessCase")
 @Composable
 fun PeopleScreenSuccessPreview() {
-    PeopleScreen(
-        viewModel = MockPeopleViewModel(
-            resultGetPeople = Result.success(mockPage),
-            resultGetPersonId = Result.failure(RuntimeException())
-        ),
+    PeopleScreenContent(
+        state = PeopleScreenState.Success(mockPage.results),
+        loadNextPage = {},
         onNavigateToDetails = {}
     )
 }
@@ -130,11 +125,9 @@ fun PeopleScreenSuccessPreview() {
 @Composable
 fun PeopleScreenErrorPreview() {
     MaterialTheme {
-        PeopleScreen(
-            viewModel = MockPeopleViewModel(
-                resultGetPeople = Result.failure(RuntimeException()),
-                resultGetPersonId = Result.failure(RuntimeException())
-            ),
+        PeopleScreenContent(
+            state = PeopleScreenState.Error("Error"),
+            loadNextPage = {},
             onNavigateToDetails = {}
         )
     }
@@ -144,12 +137,9 @@ fun PeopleScreenErrorPreview() {
 @Composable
 fun PeopleScreenLoadingPreview() {
     StarWarsAppTheme {
-        PeopleScreen(
-            viewModel = MockPeopleViewModel(
-                resultGetPeople = Result.failure(RuntimeException()),
-                resultGetPersonId = Result.failure(RuntimeException()),
-                isLoading = true,
-            ),
+        PeopleScreenContent(
+            state = PeopleScreenState.Loading,
+            loadNextPage = {},
             onNavigateToDetails = {}
         )
     }

@@ -20,10 +20,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.example.starwars.domain.model.Page
-import com.example.starwars.domain.model.Person
 import com.example.starwars.domain.model.PersonProfile
-import com.example.starwars.domain.service.PeopleService
 import com.example.starwars.ui.screen.component.ErrorMessage
 import com.example.starwars.ui.screen.component.LoadingIndicator
 import com.example.starwars.ui.theme.StarWarsAppTheme
@@ -41,14 +38,22 @@ fun PersonProfileScreen(
     LaunchedEffect(personId) {
         viewModel.loadPersonProfile(personId)
     }
+    PersonProfileContent(profileState, modifier)
+}
 
+@Composable
+fun PersonProfileContent(
+    profileState: PersonProfileScreenState,
+    modifier: Modifier = Modifier
+        .semantics { contentDescription = "Profile" },
+) {
     when (profileState) {
         is PersonProfileScreenState.Loading -> {
             LoadingIndicator(modifier = modifier)
         }
 
         is PersonProfileScreenState.Success -> {
-            val person = (profileState as PersonProfileScreenState.Success).personProfile
+            val person = profileState.personProfile
             Column(
                 modifier = modifier
                     .fillMaxSize()
@@ -83,7 +88,7 @@ fun PersonProfileScreen(
 
         is PersonProfileScreenState.Error -> {
             ErrorMessage(
-                message = (profileState as PersonProfileScreenState.Error).message,
+                message = profileState.message,
                 modifier = modifier,
                 showRetryButton = false
             )
@@ -128,24 +133,13 @@ val mockProfile = PersonProfile(
     gender = "gender"
 )
 
-class MockViewModel(
-    val resultGetPeople: Result<Page<Person>> = Result.failure(RuntimeException()),
-    val resultGetPersonId: Result<PersonProfile> = Result.success(mockProfile)
-) : PersonProfileViewModel(
-    peopleService = object : PeopleService {
-        override suspend fun getPeople(page: Int): Result<Page<Person>> = resultGetPeople
-        override suspend fun getPersonById(id: Int): Result<PersonProfile> = resultGetPersonId
-    }
-)
-
 
 @Preview(showBackground = true, name = "ScreenSuccessCase")
 @Composable
 fun PreviewProfileSuccessCase() {
     StarWarsAppTheme {
-        PersonProfileScreen(
-            personId = 1,
-            viewModel = MockViewModel().apply { loadPersonProfile(1) },
+        PersonProfileContent(
+            profileState = PersonProfileScreenState.Success(mockProfile)
         )
     }
 }
@@ -154,11 +148,18 @@ fun PreviewProfileSuccessCase() {
 @Composable
 fun PreviewProfileErrorCase() {
     StarWarsAppTheme {
-        PersonProfileScreen(
-            personId = 1,
-            viewModel = MockViewModel(
-                resultGetPersonId = Result.failure(RuntimeException("Error"))
-            ).apply { loadPersonProfile(1) },
+        PersonProfileContent(
+            profileState = PersonProfileScreenState.Error("Error")
+        )
+    }
+}
+
+@Preview(showBackground = true, name = "ScreenLoadingCase")
+@Composable
+fun PreviewProfileLoadingCase() {
+    StarWarsAppTheme {
+        PersonProfileContent(
+            profileState = PersonProfileScreenState.Loading
         )
     }
 }
