@@ -6,14 +6,16 @@ import androidx.room.TypeConverters
 import com.example.starwars.data.datasource.local.dao.PaginatedPersonDao
 import com.example.starwars.data.datasource.local.dao.PersonDao
 import com.example.starwars.data.datasource.local.entity.Converters
+import com.example.starwars.data.datasource.local.entity.FilmEntity
 import com.example.starwars.data.datasource.local.entity.PaginatedPersonEntity
 import com.example.starwars.data.datasource.local.entity.PersonEntity
 
 @Database(
     entities = [
         PersonEntity::class,
-        PaginatedPersonEntity::class
-    ], version = 1, exportSchema = false
+        PaginatedPersonEntity::class,
+        FilmEntity::class,
+    ], version = 2, exportSchema = false
 )
 @TypeConverters(Converters::class)
 abstract class StarWarsDatabase : RoomDatabase() {

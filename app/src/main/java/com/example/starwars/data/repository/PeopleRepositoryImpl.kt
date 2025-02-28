@@ -4,6 +4,7 @@ package com.example.starwars.data.repository
 import com.example.starwars.data.datasource.remote.StarWarsApiService
 import com.example.starwars.data.datasource.local.dao.PaginatedPersonDao
 import com.example.starwars.data.datasource.local.dao.PersonDao
+import com.example.starwars.data.datasource.local.entity.FilmEntity
 import com.example.starwars.data.datasource.local.entity.PaginatedPersonEntity
 import com.example.starwars.data.datasource.local.entity.toDto
 import com.example.starwars.data.model.PaginatedResponse
@@ -71,7 +72,8 @@ internal class PeopleRepositoryImpl(
 
         val cachedPerson = personDao.getPersonById(id)
         if (cachedPerson != null && !isExpired(currentTime, cachedPerson.timestamp)) {
-            return@runCatching cachedPerson.toDto()
+            val films = personDao.getFilmByPersonId(personId = cachedPerson.id)
+            return@runCatching cachedPerson.toDto(films)
         }
 
         val response = apiService.getPersonById(id)
@@ -79,7 +81,11 @@ internal class PeopleRepositoryImpl(
         delay(600)
         if (response.isSuccessful) {
             val remotePerson = response.body()!!
-            personDao.insertPerson(remotePerson.toEntity())
+            val personEntity = remotePerson.toEntity()
+            personDao.insertPerson(personEntity)
+            personEntity.films.forEach {
+                personDao.insertFilm(FilmEntity(personId = personEntity.id, filmUrl = it))
+            }
             remotePerson
         } else {
             throw exceptionMapper(response)

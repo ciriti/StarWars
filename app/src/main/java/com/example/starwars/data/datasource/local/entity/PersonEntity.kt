@@ -43,11 +43,11 @@ data class PersonEntity(
     ]
 )
 data class FilmEntity(
-    val personId : Int,
+    @PrimaryKey val personId : Int,
     val filmUrl: String
 )
 
-fun PersonEntity.toDto(): PersonDto {
+fun PersonEntity.toDto(filmEntries: List<FilmEntity> = emptyList()): PersonDto {
     return PersonDto(
         name = name,
         height = height,
@@ -58,6 +58,7 @@ fun PersonEntity.toDto(): PersonDto {
         birth_year = birthYear,
         gender = gender,
         homeworld = homeworld,
+        // TODO create a list of FilmEntities
         films = films,
         species = species,
         vehicles = vehicles,
