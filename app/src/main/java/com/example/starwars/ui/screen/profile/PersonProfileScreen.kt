@@ -20,8 +20,13 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.example.starwars.domain.model.Page
+import com.example.starwars.domain.model.Person
+import com.example.starwars.domain.model.PersonProfile
+import com.example.starwars.domain.service.PeopleService
 import com.example.starwars.ui.screen.component.ErrorMessage
 import com.example.starwars.ui.screen.component.LoadingIndicator
+import com.example.starwars.ui.theme.StarWarsAppTheme
 import org.koin.androidx.compose.koinViewModel
 
 @Composable
@@ -106,6 +111,58 @@ fun ProfileDetailSection(details: List<Pair<String, String>>) {
         }
     }
 }
+
+val mockProfile = PersonProfile(
+    id = 1,
+    name = "Luke Skywalker",
+    height = "180",
+    mass = "80",
+    url = "",
+    hairColor = "hairColor",
+    skinColor = "skinColor",
+    eyeColor = "eyeColor",
+    birthYear = "birthYear",
+    homeworld = "homeworld",
+    created = "created",
+    edited = "edited",
+    gender = "gender"
+)
+
+class MockViewModel(
+    val resultGetPeople: Result<Page<Person>> = Result.failure(RuntimeException()),
+    val resultGetPersonId: Result<PersonProfile> = Result.success(mockProfile)
+) : PersonProfileViewModel(
+    peopleService = object : PeopleService {
+        override suspend fun getPeople(page: Int): Result<Page<Person>> = resultGetPeople
+        override suspend fun getPersonById(id: Int): Result<PersonProfile> = resultGetPersonId
+    }
+)
+
+
+@Preview(showBackground = true, name = "ScreenSuccessCase")
+@Composable
+fun PreviewProfileSuccessCase() {
+    StarWarsAppTheme {
+        PersonProfileScreen(
+            personId = 1,
+            viewModel = MockViewModel().apply { loadPersonProfile(1) },
+        )
+    }
+}
+
+@Preview(showBackground = true, name = "ScreenSuccessCase")
+@Composable
+fun PreviewProfileErrorCase() {
+    StarWarsAppTheme {
+        PersonProfileScreen(
+            personId = 1,
+            viewModel = MockViewModel(
+                resultGetPersonId = Result.failure(RuntimeException("Error"))
+            ).apply { loadPersonProfile(1) },
+        )
+    }
+}
+
 
 @Preview(showBackground = true)
 @Composable
