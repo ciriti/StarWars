@@ -19,7 +19,7 @@ fun SetupNavGraph(
         topBar = {
             TopAppBar(
                 currentDestination = currentDestination,
-                onNavigateBack = { navController.navigateUp() },
+                onNavigateBack = { navController.popBackStack() },
                 onMenuClick = { },
             )
         }
